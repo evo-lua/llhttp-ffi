@@ -77,7 +77,7 @@ String LinkedList_toString(LinkedList* list, String buffer) {
 
 void LinkedList_dump(LinkedList* list) {
 	String buffer = malloc(list->totalSpanSizeInBytes);
-	printf("Buffered sting: %s", buffer);
+	printf("Buffered string: %s", buffer);
 
 	printf("Length: %s\nCharacters: %d\n%s\n", list->length, list->totalSpanSizeInBytes, LinkedList_toString(list, buffer));
 	free(buffer);
