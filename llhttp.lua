@@ -191,8 +191,8 @@ function llhttp.create()
 	return instance
 end
 
-function llhttp.reset() end
-function llhttp.execute(stringToParse) end
-function llhttp.finish() end
+function llhttp:reset() end
+function llhttp:execute(stringToParse) end
+function llhttp:finish() end
 
 return llhttp
