@@ -4,11 +4,79 @@ local isWindows = (ffi.os == "Windows")
 
 local WINDOWS_SHARED_LIBRARY_EXTENSION = "dll"
 local UNIX_SHARED_LIBRARY_EXTENSION = "so"
+local expectedFileExtension = isWindows and WINDOWS_SHARED_LIBRARY_EXTENSION or UNIX_SHARED_LIBRARY_EXTENSION
 
 local llhttp = {
-	expectedFileExtension = isWindows and WINDOWS_SHARED_LIBRARY_EXTENSION or UNIX_SHARED_LIBRARY_EXTENSION,
 	cdefs = [[
-		// TODO
+		struct llhttp__internal_s {
+			int32_t _index;
+			void* _span_pos0;
+			void* _span_cb0;
+			int32_t error;
+			const char* reason;
+			const char* error_pos;
+			void* data;
+			void* _current;
+			uint64_t content_length;
+			uint8_t type;
+			uint8_t method;
+			uint8_t http_major;
+			uint8_t http_minor;
+			uint8_t header_state;
+			uint8_t lenient_flags;
+			uint8_t upgrade;
+			uint8_t finish;
+			uint16_t flags;
+			uint16_t status_code;
+			void* settings;
+		};
+		typedef struct llhttp__internal_s llhttp__internal_t;
+		typedef llhttp__internal_t llhttp_t;
+		typedef int (*llhttp_data_cb)(llhttp_t* parser_state, const char *at, size_t length);
+		// Note: Parameters at & length are useless for llhttp_cb, do not use them in non-llhttp_data_cb callbacks
+		typedef int (*llhttp_cb)(llhttp_t*parser_state, const char *at, size_t length);
+
+		struct llhttp_settings_s {
+			/* Possible return values 0, -1, `HPE_PAUSED` */
+			llhttp_cb			on_message_begin;
+
+			/* Possible return values 0, -1, HPE_USER */
+			llhttp_data_cb on_url;
+			llhttp_data_cb on_status;
+			llhttp_data_cb on_header_field;
+			llhttp_data_cb on_header_value;
+
+			/* Possible return values:
+			* 0	- Proceed normally
+			* 1	- Assume that request/response has no body, and proceed to parsing the
+			*			next message
+			* 2	- Assume absence of body (as above) and make `llhttp_execute()` return
+			*			`HPE_PAUSED_UPGRADE`
+			* -1 - Error
+			* `HPE_PAUSED`
+			*/
+			llhttp_cb			on_headers_complete;
+
+			/* Possible return values 0, -1, HPE_USER */
+			llhttp_data_cb on_body;
+
+			/* Possible return values 0, -1, `HPE_PAUSED` */
+			llhttp_cb			on_message_complete;
+
+			/* When on_chunk_header is called, the current chunk length is stored
+			* in parser->content_length.
+			* Possible return values 0, -1, `HPE_PAUSED`
+			*/
+			llhttp_cb			on_chunk_header;
+			llhttp_cb			on_chunk_complete;
+
+			/* Information-only callbacks, return value is ignored */
+			llhttp_cb			on_url_complete;
+			llhttp_cb			on_status_complete;
+			llhttp_cb			on_header_field_complete;
+			llhttp_cb			on_header_value_complete;
+		};
+		typedef struct llhttp_settings_s llhttp_settings_t;
 	]],
 	PARSER_TYPES = {
 		HTTP_BOTH = 0,
@@ -94,7 +162,25 @@ local llhttp = {
 	}
 }
 
-function llhttp.create() end
+ffi.cdef(llhttp.cdefs)
+
+local cLibrary = ffi.load("llhttp" .. "." .. expectedFileExtension)
+local cCallbackHelper = ffi.load("test" .. "." .. expectedFileExtension)
+
+function llhttp.create()
+
+	local parser = ffi.new("llhttp_t")
+	local settings = ffi.new("llhttp_settings_t")
+
+	local instance = {}
+
+	instance.state = parser
+	instance.settings = settings
+	setmetatable(instance, { __index = llhttp})
+
+	return instance
+end
+
 function llhttp.reset() end
 function llhttp.execute(stringToParse) end
 function llhttp.finish() end

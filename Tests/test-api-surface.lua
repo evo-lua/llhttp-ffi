@@ -1,4 +1,4 @@
-local llhttp = import("../llhttp.lua")
+local llhttp = _G.llhttp
 
 local expectedFields = {
 	-- Format: name = type
@@ -40,7 +40,6 @@ local exportedApiSurface = {
 	-- llhttp_set_lenient_chunked_length
 	-- llhttp_set_lenient_keep_alive
 }
-
 
 for index, functionName in pairs(exportedApiSurface) do
 	assert(type(llhttp[functionName]) == "function", "Should export function: " .. functionName)
