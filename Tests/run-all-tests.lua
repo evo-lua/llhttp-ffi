@@ -6,6 +6,6 @@ _G.llhttp = llhttp
 
 import("test-api-surface.lua")
 import("API/test-create.lua")
-
+import("API/test-execute.lua")
 
 print("\nAll tests completed!")
