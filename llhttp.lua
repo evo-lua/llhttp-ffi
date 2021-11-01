@@ -174,7 +174,7 @@ local llhttp = {
 ffi.cdef(llhttp.cdefs)
 
 local parserLibrary = ffi.load("llhttp" .. "." .. expectedFileExtension)
-local callbackHandler = ffi.load("llhttp_ffi" .. "." .. expectedFileExtension)
+local callbackHandlers = ffi.load("llhttp_ffi" .. "." .. expectedFileExtension)
 
 function llhttp.create()
 
@@ -187,7 +187,6 @@ function llhttp.create()
 	instance.state = parser
 	instance.settings = settings
 	setmetatable(instance, { __index = llhttp})
-
 
 	return instance
 end
