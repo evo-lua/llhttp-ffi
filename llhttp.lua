@@ -86,6 +86,35 @@ local llhttp = {
 		typedef enum llhttp_type llhttp_type_t;
 		void llhttp_init(llhttp_t* parser, llhttp_type_t type, const llhttp_settings_t* settings);
 
+		enum llhttp_errno {
+			HPE_OK = 0,
+			HPE_INTERNAL = 1,
+			HPE_STRICT = 2,
+			HPE_LF_EXPECTED = 3,
+			HPE_UNEXPECTED_CONTENT_LENGTH = 4,
+			HPE_CLOSED_CONNECTION = 5,
+			HPE_INVALID_METHOD = 6,
+			HPE_INVALID_URL = 7,
+			HPE_INVALID_CONSTANT = 8,
+			HPE_INVALID_VERSION = 9,
+			HPE_INVALID_HEADER_TOKEN = 10,
+			HPE_INVALID_CONTENT_LENGTH = 11,
+			HPE_INVALID_CHUNK_SIZE = 12,
+			HPE_INVALID_STATUS = 13,
+			HPE_INVALID_EOF_STATE = 14,
+			HPE_INVALID_TRANSFER_ENCODING = 15,
+			HPE_CB_MESSAGE_BEGIN = 16,
+			HPE_CB_HEADERS_COMPLETE = 17,
+			HPE_CB_MESSAGE_COMPLETE = 18,
+			HPE_CB_CHUNK_HEADER = 19,
+			HPE_CB_CHUNK_COMPLETE = 20,
+			HPE_PAUSED = 21,
+			HPE_PAUSED_UPGRADE = 22,
+			HPE_PAUSED_H2_UPGRADE = 23,
+			HPE_USER = 24
+		};
+		typedef enum llhttp_errno llhttp_errno_t;
+		llhttp_errno_t llhttp_execute(llhttp_t* parser, const char* data, size_t len);
 	]],
 	PARSER_TYPES = {
 		HTTP_BOTH = 0,
