@@ -1,0 +1,1 @@
+cl /LD LinkedList.c CallbackHandlers.c -o llhttp_ffi.dll /link /DEF:llhttp_ffi.def

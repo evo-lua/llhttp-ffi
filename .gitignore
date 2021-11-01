@@ -1,0 +1,5 @@
+# msvc output
+*.obj
+*.exp
+*.lib
+*.dll
