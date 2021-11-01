@@ -12,6 +12,11 @@ REM and its many (broken) errors will fail the script needlessly
 CALL npm install --save-dev --no-audit --no-fund @types/node
 make release
 
+REM Make windows DLL (required to access the exports via LuaJIT FFI)
+cd release
+cl /LD /I include src/api.c src/http.c src/llhttp.c -o ..\..\llhttp.dll /link /DEF:..\..\llhttp.def
+cd ..
+
 REM If there were no errors, the header should be in
 REM	<llhttp_ffi root>/llhttp/release/include/llhttp.h
 
