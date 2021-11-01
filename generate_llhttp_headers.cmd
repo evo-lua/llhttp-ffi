@@ -14,7 +14,7 @@ make release
 
 REM Make windows DLL (required to access the exports via LuaJIT FFI)
 cd release
-cl /LD /I include src/api.c src/http.c src/llhttp.c -o ..\..\llhttp.dll /link /DEF:..\..\llhttp.def
+cl /LD /O2 /I include src/api.c src/http.c src/llhttp.c -o ..\..\llhttp.dll /link /DEF:..\..\llhttp.def
 cd ..
 
 REM If there were no errors, the header should be in
