@@ -77,6 +77,15 @@ local llhttp = {
 			llhttp_cb			on_header_value_complete;
 		};
 		typedef struct llhttp_settings_s llhttp_settings_t;
+
+		enum llhttp_type {
+			HTTP_BOTH = 0,
+			HTTP_REQUEST = 1,
+			HTTP_RESPONSE = 2
+		};
+		typedef enum llhttp_type llhttp_type_t;
+		void llhttp_init(llhttp_t* parser, llhttp_type_t type, const llhttp_settings_t* settings);
+
 	]],
 	PARSER_TYPES = {
 		HTTP_BOTH = 0,
@@ -164,19 +173,21 @@ local llhttp = {
 
 ffi.cdef(llhttp.cdefs)
 
-local cLibrary = ffi.load("llhttp" .. "." .. expectedFileExtension)
-local cCallbackHelper = ffi.load("test" .. "." .. expectedFileExtension)
+local parserLibrary = ffi.load("llhttp" .. "." .. expectedFileExtension)
+local callbackHandler = ffi.load("llhttp_ffi" .. "." .. expectedFileExtension)
 
 function llhttp.create()
 
-	local parser = ffi.new("llhttp_t")
-	local settings = ffi.new("llhttp_settings_t")
+	local parser = ffi.new("llhttp_t*")
+	local settings = ffi.new("llhttp_settings_t*")
+	parserLibrary.llhttp_init(parser, llhttp.PARSER_TYPES.HTTP_BOTH, settings)
 
 	local instance = {}
 
 	instance.state = parser
 	instance.settings = settings
 	setmetatable(instance, { __index = llhttp})
+
 
 	return instance
 end
