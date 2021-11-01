@@ -178,8 +178,8 @@ local callbackHandlers = ffi.load("llhttp_ffi" .. "." .. expectedFileExtension)
 
 function llhttp.create()
 
-	local parser = ffi.new("llhttp_t*")
-	local settings = ffi.new("llhttp_settings_t*")
+	local parser = ffi.new("llhttp_t")
+	local settings = ffi.new("llhttp_settings_t")
 	parserLibrary.llhttp_init(parser, llhttp.PARSER_TYPES.HTTP_BOTH, settings)
 
 	local instance = {}
