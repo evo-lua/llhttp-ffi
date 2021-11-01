@@ -219,7 +219,16 @@ function llhttp.create()
 end
 
 function llhttp:reset() end
-function llhttp:execute(stringToParse) end
+function llhttp:execute(stringToParse)
+	-- printf("Executing string %s", stringToParse)
+	parserLibrary.llhttp_execute(self.state, stringToParse, #stringToParse)
+
+	self.contentLength = tonumber(self.state.content_length)
+	self.errorCode = tonumber(self.state.error)
+	self.ok = (self.errorCode == llhttp.ERROR_TYPES.HPE_OK)
+	self.method = tonumber(self.state.method)
+end
+
 function llhttp:finish() end
 
 return llhttp
