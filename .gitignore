@@ -3,6 +3,7 @@
 *.exp
 *.lib
 *.dll
+*.exe
 
 # Packaged release
 *.tar.gz
