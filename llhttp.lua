@@ -8,6 +8,32 @@ local expectedFileExtension = isWindows and WINDOWS_SHARED_LIBRARY_EXTENSION or 
 
 local llhttp = {
 	cdefs = [[
+		// We only need those because we have to access the userdata pointer in a structured way
+		typedef char* String;
+
+		typedef struct ListElement{
+			struct ListElement* previous;
+			String value;
+			size_t numCharacters;
+		} ListElement;
+
+		typedef struct {
+			size_t length;
+			ListElement* tail;
+			size_t totalSpanSizeInBytes;
+		} LinkedList;
+
+		// This struct will be assigned to the void userdata pointer instead of its actual type, so that we can access it here
+		typedef struct {
+			LinkedList* urlTokens;
+			LinkedList* statusTokens;
+			LinkedList* headerKeyValueTokens;
+			String url;
+			String status;
+			String* headerKeysAndValues;
+			size_t numHeaderPairs;
+		} RequestDetails;
+
 		struct llhttp__internal_s {
 			int32_t _index;
 			void* _span_pos0;
@@ -15,7 +41,8 @@ local llhttp = {
 			int32_t error;
 			const char* reason;
 			const char* error_pos;
-			void* data;
+			RequestDetails* data;
+			// Actually: void* data;
 			void* _current;
 			uint64_t content_length;
 			uint8_t type;
@@ -262,6 +289,7 @@ function llhttp:execute(stringToParse)
 	self.errorCode = tonumber(self.state.error)
 	self.ok = (self.errorCode == llhttp.ERROR_TYPES.HPE_OK)
 	self.method = tonumber(self.state.method)
+	self.parsedURL = ffi.string(self.state.data.url)
 end
 
 function llhttp:finish() end
