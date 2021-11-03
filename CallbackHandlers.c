@@ -102,7 +102,15 @@ typedef struct {
 
 void Bindings_InitializeUserData(llhttp_t* parserState) {
 	DEBUG("[Bindings_InitializeUserData]\n");
-	parserState->data = malloc(sizeof(RequestDetails));
-	memset(parserState->data, 0, sizeof(RequestDetails));
+
+	RequestDetails* requestDetails = malloc(sizeof(RequestDetails));
+	memset(requestDetails, 0, sizeof(RequestDetails));
+
+	requestDetails->numHeaderPairs = 0;
+	requestDetails->urlTokens = LinkedList_new();
+	requestDetails->statusTokens = LinkedList_new();
+	requestDetails->headerKeyValueTokens = LinkedList_new();
+
 	// TBD: When should this be freed?
+	parserState->data = requestDetails;
 }

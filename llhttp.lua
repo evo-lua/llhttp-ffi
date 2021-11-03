@@ -130,6 +130,8 @@ local llhttp = {
 		int Bindings_OnStatusComplete(llhttp_t*, const char*, size_t);
 		int Bindings_OnHeaderFieldComplete(llhttp_t*, const char*, size_t);
 		int Bindings_OnHeaderValueComplete(llhttp_t*, const char*, size_t);
+
+		void Bindings_InitializeUserData(llhttp_t* parserState);
 	]],
 	PARSER_TYPES = {
 		HTTP_BOTH = 0,
@@ -239,6 +241,8 @@ function llhttp.create()
 	settings.on_header_value_complete = callbackHandlers.Bindings_OnHeaderValueComplete
 
 	parserLibrary.llhttp_init(parser, llhttp.PARSER_TYPES.HTTP_BOTH, settings)
+
+	callbackHandlers.Bindings_InitializeUserData(parser)
 
 	local instance = {}
 
