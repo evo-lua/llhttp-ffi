@@ -2,11 +2,34 @@
 
 // We need the typedefs from lhttp since otherwise the implemented callback handlers won't be compatible
 #include "llhttp.h"
+#include "LinkedList.c"
+
+typedef struct {
+	LinkedList* urlTokens;
+	LinkedList* statusTokens;
+	LinkedList* headerKeyValueTokens;
+	String url;
+	String status;
+	String* headerKeysAndValues;
+	size_t numHeaderPairs;
+} RequestDetails;
 
 #include "Settings.c"
 
 // Shorthands
 typedef char* String;
+
+void Internal_AppendTokenToList(const String chunk, size_t length, LinkedList* listToAppendTo) {
+
+	String span = malloc(length + 1); // string plus null terminator
+
+	// Copy character one by one (there's probably not a more efficient way, is there?)
+	for(int offset=0; offset < length; offset++) span[offset] = *(chunk + offset);
+	span[length] = 0; // Finalize string by adding the null terminator
+
+	LinkedList_insert(listToAppendTo, span);
+	// TBD: Free when?
+}
 
 // Note on return values: These have the potential to make the parser enter an error state (set error code to the return value, if nonzero)
 // For "data" callbacks (llhttp_data_cb): See comments in llhttp.h's llhttp_settings_s struct
@@ -23,6 +46,8 @@ int Bindings_OnMessageBegin(llhttp_t* parserState, const String remainingBufferC
 
 int Bindings_OnURL(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnURL]\n");
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->urlTokens;
+	Internal_AppendTokenToList(remainingBufferContent, numRelevantBytes, relevantList);
 	return 0;
 }
 
@@ -70,6 +95,9 @@ int Bindings_OnChunkComplete(llhttp_t* parserState, const String remainingBuffer
 
 int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnUrlComplete]\n");
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->urlTokens;
+	// TODO Remove dump
+	LinkedList_dump(relevantList);
 	return 0;
 }
 
@@ -88,17 +116,6 @@ int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remaining
 	return 0;
 }
 
-#include "LinkedList.c"
-
-typedef struct {
-	LinkedList* urlTokens;
-	LinkedList* statusTokens;
-	LinkedList* headerKeyValueTokens;
-	String url;
-	String status;
-	String* headerKeysAndValues;
-	size_t numHeaderPairs;
-} RequestDetails;
 
 void Bindings_InitializeUserData(llhttp_t* parserState) {
 	DEBUG("[Bindings_InitializeUserData]\n");
