@@ -115,6 +115,21 @@ local llhttp = {
 		};
 		typedef enum llhttp_errno llhttp_errno_t;
 		llhttp_errno_t llhttp_execute(llhttp_t* parser, const char* data, size_t len);
+
+		int Bindings_OnMessageBegin(llhttp_t*, const char*, size_t);
+		int Bindings_OnURL(llhttp_t*, const char*, size_t);
+		int Bindings_OnStatus(llhttp_t*, const char*, size_t);
+		int Bindings_OnHeaderField(llhttp_t*, const char*, size_t);
+		int Bindings_OnHeaderValue(llhttp_t*, const char*, size_t);
+		int Bindings_OnHeadersComplete(llhttp_t*, const char*, size_t);
+		int Bindings_OnBody(llhttp_t*, const char*, size_t);
+		int Bindings_OnMessageComplete(llhttp_t*, const char*, size_t);
+		int Bindings_OnChunkHeader(llhttp_t*, const char*, size_t);
+		int Bindings_OnChunkComplete(llhttp_t*, const char*, size_t);
+		int Bindings_OnUrlComplete(llhttp_t*, const char*, size_t);
+		int Bindings_OnStatusComplete(llhttp_t*, const char*, size_t);
+		int Bindings_OnHeaderFieldComplete(llhttp_t*, const char*, size_t);
+		int Bindings_OnHeaderValueComplete(llhttp_t*, const char*, size_t);
 	]],
 	PARSER_TYPES = {
 		HTTP_BOTH = 0,
@@ -207,6 +222,22 @@ function llhttp.create()
 
 	local parser = ffi.new("llhttp_t")
 	local settings = ffi.new("llhttp_settings_t")
+
+	settings.on_message_begin = callbackHandlers.Bindings_OnMessageBegin
+	settings.on_url = callbackHandlers.Bindings_OnURL
+	settings.on_status = callbackHandlers.Bindings_OnStatus
+	settings.on_header_field = callbackHandlers.Bindings_OnHeaderField
+	settings.on_header_value = callbackHandlers.Bindings_OnHeaderValue
+	settings.on_headers_complete = callbackHandlers.Bindings_OnHeadersComplete
+	settings.on_body = callbackHandlers.Bindings_OnBody
+	settings.on_message_complete = callbackHandlers.Bindings_OnMessageComplete
+	settings.on_chunk_header = callbackHandlers.Bindings_OnChunkHeader
+	settings.on_chunk_complete = callbackHandlers.Bindings_OnChunkComplete
+	settings.on_url_complete = callbackHandlers.Bindings_OnUrlComplete
+	settings.on_status_complete = callbackHandlers.Bindings_OnStatusComplete
+	settings.on_header_field_complete = callbackHandlers.Bindings_OnHeaderFieldComplete
+	settings.on_header_value_complete = callbackHandlers.Bindings_OnHeaderValueComplete
+
 	parserLibrary.llhttp_init(parser, llhttp.PARSER_TYPES.HTTP_BOTH, settings)
 
 	local instance = {}
