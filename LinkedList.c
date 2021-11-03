@@ -1,9 +1,10 @@
+// Specialized linked list to help concatenate the individual strings we're passed as peacemeal or whole, depending on the circumstances.
+// It's not pretty and probably horribly coded, since I'm not a C programmer. Suggestions for improvement are always welcome!
+
 #include <stdlib.h>
 #include <string.h>
 
-#define ENABLE_DEBUG_MODUE 1
-#define DEBUG(fmt, ...) \
-     do { if (ENABLE_DEBUG_MODUE) printf(fmt, __VA_ARGS__); } while (0)
+#include "Settings.c"
 
 typedef char* String;
 
