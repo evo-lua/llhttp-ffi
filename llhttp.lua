@@ -25,8 +25,7 @@ local llhttp = {
 
 		// This struct will be assigned to the void userdata pointer instead of its actual type, so that we can access it here
 		typedef struct {
-			LinkedList* urlTokens;
-			LinkedList* statusTokens;
+			LinkedList* tokens;
 			LinkedList* headerKeyValueTokens;
 			String url;
 			String status;
