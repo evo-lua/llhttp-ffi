@@ -6,6 +6,8 @@ _G.llhttp = llhttp
 
 import("test-api-surface.lua")
 import("API/test-create.lua")
-import("API/test-execute.lua")
+import("API/test-execute-basic.lua")
+import("API/test-execute-upgrade-multivalue.lua")
+import("API/test-execute-websockets-upgrade.lua")
 
 print("\nAll tests completed!")
