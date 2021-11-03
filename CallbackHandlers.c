@@ -1,12 +1,12 @@
 // TODO: Rename to llhttpcb or sth?
+// TODO: Ensure malloc/free calls are covered with tests
 
 // We need the typedefs from lhttp since otherwise the implemented callback handlers won't be compatible
 #include "llhttp.h"
 #include "LinkedList.c"
 
 typedef struct {
-	LinkedList* urlTokens;
-	LinkedList* statusTokens;
+	LinkedList* tokens;
 	LinkedList* headerKeyValueTokens;
 	String url;
 	String status; // todo remove, already stored in the parser state (need to update ffi cdef also... later)
@@ -46,7 +46,7 @@ int Bindings_OnMessageBegin(llhttp_t* parserState, const String remainingBufferC
 
 int Bindings_OnURL(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnURL]\n");
-	LinkedList* relevantList = ((RequestDetails*) parserState->data)->urlTokens;
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	Internal_AppendTokenToList(remainingBufferContent, numRelevantBytes, relevantList);
 	return 0;
 }
@@ -60,15 +60,17 @@ int Bindings_OnStatus(llhttp_t* parserState, const String remainingBufferContent
 // Note: Can occur multiple times if the field (as received via TCP packets) is split across multiple buffers!
 int Bindings_OnHeaderField(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderField]\n");
-	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	Internal_AppendTokenToList(remainingBufferContent, numRelevantBytes, relevantList);
 	return 0;
 }
 
 int Bindings_OnHeaderValue(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderValue]\n");
-	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
+	DEBUG("A");
 	Internal_AppendTokenToList(remainingBufferContent, numRelevantBytes, relevantList);
+	DEBUG("B");
 	return 0;
 }
 
@@ -85,6 +87,10 @@ int Bindings_OnBody(llhttp_t* parserState, const String remainingBufferContent, 
 
 int Bindings_OnMessageComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnMessageComplete]\n");
+
+	LinkedList* headerPairs = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList_dump(headerPairs);
+
 	return 0;
 }
 
@@ -100,7 +106,7 @@ int Bindings_OnChunkComplete(llhttp_t* parserState, const String remainingBuffer
 
 int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnUrlComplete]\n");
-	LinkedList* relevantList = ((RequestDetails*) parserState->data)->urlTokens;
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
 
@@ -110,7 +116,7 @@ int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferCo
 	((RequestDetails*) parserState->data)->url = parsedURL;
 	DEBUG("Stored parsed URL: %s\n", parsedURL);
 
-	// TBD: Can probably free the list at this point?
+	LinkedList_clear(relevantList);
 
 	return 0;
 }
@@ -122,30 +128,48 @@ int Bindings_OnStatusComplete(llhttp_t* parserState, const String remainingBuffe
 
 int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderFieldComplete]\n");
-	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
 
 	// Save the final URL
 	String headerFieldName = malloc(sizeof(String));
 	LinkedList_toString(relevantList, headerFieldName);
-	size_t numHeaderPairs = ((RequestDetails*) parserState->data)->numHeaderPairs;
-	((RequestDetails*) parserState->data)->headerKeysAndValues[numHeaderPairs] = headerFieldName; // todo not a proper String array
-	DEBUG("Stored parsed headerFieldName: %s\n", headerFieldName);
+	// size_t numHeaderPairs = ((RequestDetails*) parserState->data)->numHeaderPairs;
+	// ((RequestDetails*) parserState->data)->headerKeysAndValues[numHeaderPairs] = headerFieldName;
+	DEBUG("Stored parsed header key: %s\n", headerFieldName);
+
+	LinkedList* headerPairs = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList_insert(headerPairs, headerFieldName);
 
 	// TODO: numHeaderPairs++
-
+	// TODO DRY
 	// Since the individual fields are null-terminated strings, we must remove them after processing or processing of future headers will fail
-	size_t numRemovedElements = LinkedList_clear(relevantList); // This removes only the current header, which we just saved, whether it's stored as one token or several
-	DEBUG("Removed %d tokens after storing header field %s", numRemovedElements, headerFieldName);
+	size_t numRemovedElements = LinkedList_clear(relevantList);
+	 // This removes only the current header, which we just saved, whether it's stored as one token or several
+	DEBUG("Removed %d tokens after storing header field %s\n", numRemovedElements, headerFieldName);
+
 	return 0;
 }
 
 int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderValueComplete]\n");
-	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
+
+	String headerValue = malloc(sizeof(String));
+	LinkedList_toString(relevantList, headerValue);
+
+
+	DEBUG("Stored parsed header value: %s\n", headerValue);
+	LinkedList* headerPairs = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	LinkedList_insert(headerPairs, headerValue);
+
+
+	size_t numRemovedElements = LinkedList_clear(relevantList);
+	// This removes only the current header, which we just saved, whether it's stored as one token or several
+	DEBUG("Removed %d tokens after storing header value %s\n", numRemovedElements, headerValue);
 
 	// TODO: numHeaderPairs++
 	return 0;
@@ -159,8 +183,7 @@ void Bindings_InitializeUserData(llhttp_t* parserState) {
 	memset(requestDetails, 0, sizeof(RequestDetails));
 
 	requestDetails->numHeaderPairs = 0;
-	requestDetails->urlTokens = LinkedList_new();
-	requestDetails->statusTokens = LinkedList_new();
+	requestDetails->tokens = LinkedList_new();
 	requestDetails->headerKeyValueTokens = LinkedList_new();
 
 	// TBD: When should this be freed?

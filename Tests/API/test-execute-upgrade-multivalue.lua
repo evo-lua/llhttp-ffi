@@ -2,13 +2,13 @@ local llhttp = _G.llhttp
 
 local parser = llhttp.create()
 
-local websocketsUpgradeRequest = "GET /index.html HTTP/1.1\r\nHost: www.example.com\r\nConnection: upgrade\r\nUpgrade: example/1, foo/2";
+local websocketsUpgradeRequest = "GET /index.html HTTP/1.1\r\nHost: www.example.com\r\nConnection: upgrade\r\nUpgrade: example/1, foo/2\r\n\r\n";
 parser:execute(websocketsUpgradeRequest)
 
 -- dump(parser)
--- parser:dump()
+parser:dump()
 
-assert(parser.ok, "The parser should not enter an error state after executing a valid request")
+assert(parser.errorCode == parser.ERROR_TYPES.HPE_PAUSED_UPGRADE, "The parser should enter the HPE_PAUSED_UPGRADE error state")
 assert(parser.method == llhttp.HTTP_METHODS.HTTP_GET, "Should parse the HTTP method correctly after executing a valid request")
 assert(parser.parsedURL == "/index.html", "Should parse the URL correctly after executing a valid request")
 assert(parser.version == 1.1, "Should parse the HTTP version correctly after executing a valid request")
