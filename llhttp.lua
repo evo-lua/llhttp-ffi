@@ -290,6 +290,7 @@ function llhttp:execute(stringToParse)
 	self.ok = (self.errorCode == llhttp.ERROR_TYPES.HPE_OK)
 	self.method = tonumber(self.state.method)
 	self.parsedURL = ffi.string(self.state.data.url)
+	self.version = tonumber(self.state.http_major) + tonumber(self.state.http_minor) / 10
 end
 
 function llhttp:finish() end
