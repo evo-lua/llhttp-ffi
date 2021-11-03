@@ -77,6 +77,13 @@ int Bindings_OnHeaderValue(llhttp_t* parserState, const String remainingBufferCo
 int Bindings_OnHeadersComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeadersComplete]\n");
 	// TODO Build the final array/string?
+
+	RequestDetails* requestDetails = ((RequestDetails*) parserState->data);
+	LinkedList* headerPairs = requestDetails->headerKeyValueTokens;
+
+	DEBUG("Processing %d header pairs stored during the parsing process\n", requestDetails->numHeaderPairs);
+	LinkedList_dump(headerPairs);
+
 	return 0;
 }
 
@@ -87,9 +94,6 @@ int Bindings_OnBody(llhttp_t* parserState, const String remainingBufferContent, 
 
 int Bindings_OnMessageComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnMessageComplete]\n");
-
-	LinkedList* headerPairs = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
-	LinkedList_dump(headerPairs);
 
 	return 0;
 }
@@ -135,14 +139,13 @@ int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remaining
 	// Save the final URL
 	String headerFieldName = malloc(sizeof(String));
 	LinkedList_toString(relevantList, headerFieldName);
-	// size_t numHeaderPairs = ((RequestDetails*) parserState->data)->numHeaderPairs;
-	// ((RequestDetails*) parserState->data)->headerKeysAndValues[numHeaderPairs] = headerFieldName;
-	DEBUG("Stored parsed header key: %s\n", headerFieldName);
 
-	LinkedList* headerPairs = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	RequestDetails* requestDetails = ((RequestDetails*) parserState->data);
+	LinkedList* headerPairs = requestDetails->headerKeyValueTokens;
+	requestDetails->numHeaderPairs++;
 	LinkedList_insert(headerPairs, headerFieldName);
+	DEBUG("Stored parsed header key: %s (Stored pairs: %d)\n", headerFieldName, requestDetails->numHeaderPairs);
 
-	// TODO: numHeaderPairs++
 	// TODO DRY
 	// Since the individual fields are null-terminated strings, we must remove them after processing or processing of future headers will fail
 	size_t numRemovedElements = LinkedList_clear(relevantList);
@@ -162,16 +165,17 @@ int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remaining
 	LinkedList_toString(relevantList, headerValue);
 
 
-	DEBUG("Stored parsed header value: %s\n", headerValue);
-	LinkedList* headerPairs = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	RequestDetails* requestDetails = ((RequestDetails*) parserState->data);
+	LinkedList* headerPairs = requestDetails->headerKeyValueTokens;
 	LinkedList_insert(headerPairs, headerValue);
 
+	DEBUG("Stored parsed header value: %s (Stored pairs: %d)\n", headerValue, requestDetails->numHeaderPairs);
+	requestDetails->numHeaderPairs++;
 
 	size_t numRemovedElements = LinkedList_clear(relevantList);
 	// This removes only the current header, which we just saved, whether it's stored as one token or several
 	DEBUG("Removed %d tokens after storing header value %s\n", numRemovedElements, headerValue);
 
-	// TODO: numHeaderPairs++
 	return 0;
 }
 
