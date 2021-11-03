@@ -87,3 +87,22 @@ int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remaining
 	DEBUG("[Bindings_OnHeaderValueComplete]\n");
 	return 0;
 }
+
+#include "LinkedList.c"
+
+typedef struct {
+	LinkedList* urlTokens;
+	LinkedList* statusTokens;
+	LinkedList* headerKeyValueTokens;
+	String url;
+	String status;
+	String* headerKeysAndValues;
+	size_t numHeaderPairs;
+} RequestDetails;
+
+void Bindings_InitializeUserData(llhttp_t* parserState) {
+	DEBUG("[Bindings_InitializeUserData]\n");
+	parserState->data = malloc(sizeof(RequestDetails));
+	memset(parserState->data, 0, sizeof(RequestDetails));
+	// TBD: When should this be freed?
+}

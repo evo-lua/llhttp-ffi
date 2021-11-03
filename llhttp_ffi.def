@@ -14,3 +14,4 @@ EXPORTS
 	Bindings_OnStatusComplete
 	Bindings_OnHeaderFieldComplete
 	Bindings_OnHeaderValueComplete
+	Bindings_InitializeUserData
