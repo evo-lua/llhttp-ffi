@@ -60,16 +60,21 @@ int Bindings_OnStatus(llhttp_t* parserState, const String remainingBufferContent
 // Note: Can occur multiple times if the field (as received via TCP packets) is split across multiple buffers!
 int Bindings_OnHeaderField(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderField]\n");
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	Internal_AppendTokenToList(remainingBufferContent, numRelevantBytes, relevantList);
 	return 0;
 }
 
 int Bindings_OnHeaderValue(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderValue]\n");
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	Internal_AppendTokenToList(remainingBufferContent, numRelevantBytes, relevantList);
 	return 0;
 }
 
 int Bindings_OnHeadersComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeadersComplete]\n");
+	// TODO Build the final array/string?
 	return 0;
 }
 
@@ -98,6 +103,15 @@ int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferCo
 	LinkedList* relevantList = ((RequestDetails*) parserState->data)->urlTokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
+
+	// Save the final URL
+	String parsedURL = malloc(sizeof(String));
+	LinkedList_toString(relevantList, parsedURL);
+	((RequestDetails*) parserState->data)->url = parsedURL;
+	DEBUG("Stored parsed URL: %s\n", parsedURL);
+
+	// TBD: Can probably free the list at this point?
+
 	return 0;
 }
 
@@ -108,11 +122,17 @@ int Bindings_OnStatusComplete(llhttp_t* parserState, const String remainingBuffe
 
 int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderFieldComplete]\n");
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	// TODO Remove dump
+	LinkedList_dump(relevantList);
 	return 0;
 }
 
 int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
 	DEBUG("[Bindings_OnHeaderValueComplete]\n");
+	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
+	// TODO Remove dump
+	LinkedList_dump(relevantList);
 	return 0;
 }
 
