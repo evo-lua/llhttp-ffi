@@ -13,4 +13,4 @@ assert(parser.method == llhttp.HTTP_METHODS.HTTP_GET, "Should parse the HTTP met
 assert(parser.parsedURL == "/", "Should parse the URL correctly after executing a valid request")
 assert(parser.version == 1.1, "Should parse the HTTP version correctly after executing a valid request")
 
-printf("%s\t%s", transform.green("OK"), transform.yellow("parser.execute"))
+printf("%s\t%s", transform.green("OK"), transform.yellow("parser.execute-basic"))
