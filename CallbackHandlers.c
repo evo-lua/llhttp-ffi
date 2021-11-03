@@ -9,7 +9,7 @@ typedef struct {
 	LinkedList* statusTokens;
 	LinkedList* headerKeyValueTokens;
 	String url;
-	String status;
+	String status; // todo remove, already stored in the parser state (need to update ffi cdef also... later)
 	String* headerKeysAndValues;
 	size_t numHeaderPairs;
 } RequestDetails;
@@ -125,6 +125,19 @@ int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remaining
 	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
+
+	// Save the final URL
+	String headerFieldName = malloc(sizeof(String));
+	LinkedList_toString(relevantList, headerFieldName);
+	size_t numHeaderPairs = ((RequestDetails*) parserState->data)->numHeaderPairs;
+	((RequestDetails*) parserState->data)->headerKeysAndValues[numHeaderPairs] = headerFieldName; // todo not a proper String array
+	DEBUG("Stored parsed headerFieldName: %s\n", headerFieldName);
+
+	// TODO: numHeaderPairs++
+
+	// Since the individual fields are null-terminated strings, we must remove them after processing or processing of future headers will fail
+	size_t numRemovedElements = LinkedList_clear(relevantList); // This removes only the current header, which we just saved, whether it's stored as one token or several
+	DEBUG("Removed %d tokens after storing header field %s", numRemovedElements, headerFieldName);
 	return 0;
 }
 
@@ -133,6 +146,8 @@ int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remaining
 	LinkedList* relevantList = ((RequestDetails*) parserState->data)->headerKeyValueTokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
+
+	// TODO: numHeaderPairs++
 	return 0;
 }
 

@@ -5,8 +5,8 @@ local parser = llhttp.create()
 local superBasicRequest = "GET / HTTP/1.1\r\n\r\n";
 parser:execute(superBasicRequest)
 
-dump(parser)
-parser:dump()
+-- dump(parser)
+-- parser:dump()
 
 assert(parser.ok, "The parser should not enter an error state after executing a valid request")
 assert(parser.method == llhttp.HTTP_METHODS.HTTP_GET, "Should parse the HTTP method correctly after executing a valid request")

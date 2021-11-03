@@ -58,11 +58,20 @@ printf("Removing tail: %s\n", list->tail->value);
 	return EXIT_SUCCESS;
 }
 
-int LinkedList_destroy(LinkedList* list) {
-	DEBUG("[LinkedList_destroy]\n");
+size_t LinkedList_clear(LinkedList* list) {
+	size_t numRemovedElements = 0;
+
 	while(list->tail != NULL) {
 		LinkedList_removeTail(list);
+		numRemovedElements++;
 	}
+
+	return numRemovedElements;
+}
+
+int LinkedList_destroy(LinkedList* list) {
+	DEBUG("[LinkedList_destroy]\n");
+	LinkedList_clear(list);
 	free(list);
 
 	return EXIT_SUCCESS;
@@ -98,7 +107,7 @@ String LinkedList_toString(LinkedList* list, String buffer) {
 		String span = element->value;
 		DEBUG("Copying span: %s\n", span);
 		for(int i = 0; i< element->numCharacters; i++) {
-		DEBUG("nextFreeindex: %d\ni: %d\nCopying character: %c\n", nextFreeIndex, i, span[i]);
+		//DEBUG("nextFreeindex: %d\ni: %d\nCopying character: %c\n", nextFreeIndex, i, span[i]);
 			buffer[nextFreeIndex + i] = span[i];
 		}
 		DEBUG("Buffer contents so far: %s\n", buffer);

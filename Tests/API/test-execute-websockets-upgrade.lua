@@ -5,8 +5,8 @@ local parser = llhttp.create()
 local websocketsUpgradeRequest = "GET /chat HTTP/1.1\r\nHost: example.com:8000\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13"
 parser:execute(websocketsUpgradeRequest)
 
-dump(parser)
-parser:dump()
+-- dump(parser)
+-- parser:dump()
 
 assert(parser.ok, "The parser should not enter an error state after executing a valid request")
 assert(parser.method == llhttp.HTTP_METHODS.HTTP_GET, "Should parse the HTTP method correctly after executing a valid request")
