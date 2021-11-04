@@ -45,4 +45,5 @@ void main() {
 	LinkedList_removeTail(list);
 	printf("Buffer contents: %s\n", buffer);
 	free(buffer);
+	printf("All tests passed!");
 }
