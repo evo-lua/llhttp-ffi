@@ -307,11 +307,10 @@ function llhttp:execute(stringToParse)
 			local headerKey = ffi.string(self.state.data.headerKeysAndValues[headerID - 1])
 			local headerValue = ffi.string(self.state.data.headerKeysAndValues[headerID])
 			-- TODO Test cases for capitalization
-			-- Header key/values are case-insensitive according to the HTTP spec
+			-- Header keys are case-insensitive according to the HTTP spec
 			printf("Processing header k/v pair %d => %s: %s", headerID, headerKey, headerValue)
 			headerKey = string.lower(headerKey)
-			headerValue = string.lower(headerValue)
-
+			-- headerValue = string.lower(headerValue) -- But values are not
 			-- TODO Test cases for multiple identical fields
 				if self.headers[headerKey] ~= nil then
 					-- 		-- Already exists, add as comma-separated value (TBD: Should we verify this is allowed?)
