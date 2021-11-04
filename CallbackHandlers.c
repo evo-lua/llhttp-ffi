@@ -99,7 +99,7 @@ int Bindings_OnChunkComplete(llhttp_t* parserState, const String remainingBuffer
 	return 0;
 }
 
-int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
+int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferContent, size_t garbageData) {
 	DEBUG("[Bindings_OnUrlComplete]\n");
 	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	// TODO Remove dump
@@ -121,14 +121,14 @@ int Bindings_OnStatusComplete(llhttp_t* parserState, const String remainingBuffe
 	return 0;
 }
 
-int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
+int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remainingBufferContent, size_t garbageData) {
 	DEBUG("[Bindings_OnHeaderFieldComplete]\n");
 	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
 
 	// Save the final URL
-	String headerFieldName = String_Allocate(numRelevantBytes);
+	String headerFieldName = String_Allocate(relevantList->totalSpanSizeInBytes); // Can't use the size_t arg here since it's not a data cb
 	LinkedList_toString(relevantList, headerFieldName);
 
 	RequestDetails* requestDetails = ((RequestDetails*) parserState->data);
@@ -146,13 +146,13 @@ int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remaining
 	return 0;
 }
 
-int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remainingBufferContent, size_t numRelevantBytes) {
+int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remainingBufferContent, size_t garbageData) {
 	DEBUG("[Bindings_OnHeaderValueComplete]\n");
 	LinkedList* relevantList = ((RequestDetails*) parserState->data)->tokens;
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
 
-	String headerValue = String_Allocate(numRelevantBytes);
+	String headerValue = String_Allocate(relevantList->totalSpanSizeInBytes);
 	LinkedList_toString(relevantList, headerValue);
 
 
