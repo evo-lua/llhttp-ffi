@@ -301,10 +301,27 @@ function llhttp:execute(stringToParse)
 	if expectedNumberOfHeaderPairs > 0 then
 		printf("Processing %d header pairs", expectedNumberOfHeaderPairs)
 
-		for headerID = 1, expectedNumberOfHeaderPairs do
-			local storedValue = ffi.string(self.state.data.headerKeysAndValues[headerID - 1])
-			printf("Processing header %d: %s", headerID, storedValue)
-			table.insert(self.headers, storedValue) -- TBD Store as k, v or hash map? Multiples may occur... see nodeJS issues (referenced)
+		for headerID = 1, expectedNumberOfHeaderPairs, 2 do
+
+			-- We can rely on this since llhttp parses in order field, value and fires the callbacks correctly (hopefully)
+			local headerKey = ffi.string(self.state.data.headerKeysAndValues[headerID - 1])
+			local headerValue = ffi.string(self.state.data.headerKeysAndValues[headerID])
+			-- TODO Test cases for capitalization
+			-- Header key/values are case-insensitive according to the HTTP spec
+			printf("Processing header k/v pair %d => %s: %s", headerID, headerKey, headerValue)
+			headerKey = string.lower(headerKey)
+			headerValue = string.lower(headerValue)
+
+			-- TODO Test cases for multiple identical fields
+				if self.headers[headerKey] ~= nil then
+					-- 		-- Already exists, add as comma-separated value (TBD: Should we verify this is allowed?)
+					self.headers[headerKey] = self.headers[headerKey]  .. ", " .. headerValue
+				else
+					-- 		-- First value (common case)
+					self.headers[headerKey] = headerValue
+				end
+					dump(self.headers)
+
 		end
 	end
 end
