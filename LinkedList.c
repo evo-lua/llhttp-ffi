@@ -20,10 +20,73 @@ typedef struct {
 	size_t totalSpanSizeInBytes;
 } LinkedList;
 
+typedef struct {
+	LinkedList* tokens;
+	LinkedList* headerKeyValueTokens;
+	String url;
+	String status; // todo remove, already stored in the parser state (need to update ffi cdef also... later)
+	String* headerKeysAndValues;
+	size_t numHeaderPairs;
+} RequestDetails;
+
+size_t referenceCount_String = 0;
+size_t referenceCount_LinkedList = 0;
+size_t referenceCount_ListElement = 0;
+size_t referenceCount_StringBuffer = 0;
+size_t referenceCount_RequestDetails = 0;
+
+String String_Allocate(size_t numCharacters) {
+	DEBUG("[String_Allocate\t%d]", numCharacters);
+	String pointer = malloc(numCharacters * sizeof(char) + 1); // TBD: +1 for null terminator actually needed?
+	if(pointer == NULL) {
+		DEBUG("ERROR: Failed to allocate new String (%d references)", referenceCount_String);
+		exit(EXIT_FAILURE);
+	}
+	referenceCount_String++;
+	DEBUG("Allocated String (%d references)", referenceCount_String);
+	return pointer;
+}
+
+LinkedList* LinkedList_Allocate() {
+	DEBUG("[LinkedList_Allocate\t%d]", sizeof(LinkedList));
+	LinkedList* pointer = malloc(sizeof(LinkedList));
+	if(pointer == NULL) {
+		DEBUG("ERROR: Failed to allocate new LinkedList (%d references)", referenceCount_LinkedList);
+		exit(EXIT_FAILURE);
+	}
+	referenceCount_LinkedList++;
+	DEBUG("Allocated LinkedList (%d references)", referenceCount_LinkedList);
+	return pointer;
+}
+
+ListElement* ListElement_Allocate() {
+	DEBUG("[ListElement_Allocate\t%d]", sizeof(ListElement));
+	ListElement* pointer = malloc(sizeof(ListElement));
+	if(pointer == NULL) {
+		DEBUG("ERROR: Failed to allocate new ListElement (%d references)", referenceCount_ListElement);
+		exit(EXIT_FAILURE);
+	}
+	referenceCount_ListElement++;
+	DEBUG("Allocated ListElement (%d references)", referenceCount_ListElement);
+	return pointer;
+}
+
+RequestDetails* RequestDetails_Allocate() {
+	DEBUG("[RequestDetails_Allocate\t%d]", sizeof(RequestDetails));
+	RequestDetails* pointer = malloc(sizeof(RequestDetails));
+	if(pointer == NULL) {
+		DEBUG("ERROR: Failed to allocate new RequestDetails (%d references)", referenceCount_RequestDetails);
+		exit(EXIT_FAILURE);
+	}
+	referenceCount_RequestDetails++;
+	DEBUG("Allocated RequestDetails (%d references)", referenceCount_RequestDetails);
+	return pointer;
+}
+
 LinkedList* LinkedList_new() {
 	DEBUG("[LinkedList_new]\n");
 
-	LinkedList* list = malloc(sizeof(LinkedList));
+	LinkedList* list = LinkedList_Allocate();
 	list->tail = NULL;
 	list->length = 0;
 	list->totalSpanSizeInBytes = 0;
@@ -82,7 +145,7 @@ int LinkedList_insert(LinkedList* list, String span) {
 
 	if(list == NULL) return EXIT_FAILURE;
 
-	ListElement* element = malloc(sizeof(ListElement));
+	ListElement* element = ListElement_Allocate();
 
 	element->previous = list->tail; // Doesn't matter if it's NULL, still works
 	element->value = span;
@@ -125,7 +188,7 @@ int LinkedList_dump(LinkedList* list) {
 	if(list == NULL) return EXIT_FAILURE; // Don't segfault if unintialized
 	if(list->length <=0 ) return EXIT_SUCCESS; // Don't print random garbage data if unitialized (information disclosure)
 
-	String buffer = malloc(list->totalSpanSizeInBytes);
+	String buffer = String_Allocate(list->totalSpanSizeInBytes);
 	memset(buffer, 0, list->totalSpanSizeInBytes);
 
 	printf("Length: %d\n", list->length);

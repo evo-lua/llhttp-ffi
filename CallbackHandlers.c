@@ -5,23 +5,14 @@
 #include "llhttp.h"
 #include "LinkedList.c"
 
-typedef struct {
-	LinkedList* tokens;
-	LinkedList* headerKeyValueTokens;
-	String url;
-	String status; // todo remove, already stored in the parser state (need to update ffi cdef also... later)
-	String* headerKeysAndValues;
-	size_t numHeaderPairs;
-} RequestDetails;
-
 #include "Settings.c"
 
 // Shorthands
 typedef char* String;
 
 void Internal_AppendTokenToList(const String chunk, size_t length, LinkedList* listToAppendTo) {
-
-	String span = malloc(length + 1); // string plus null terminator
+	DEBUG("[Internal_AppendTokenToList]\n");
+	String span = String_Allocate(length); // string plus null terminator
 
 	// Copy character one by one (there's probably not a more efficient way, is there?)
 	for(int offset=0; offset < length; offset++) span[offset] = *(chunk + offset);
@@ -115,7 +106,7 @@ int Bindings_OnUrlComplete(llhttp_t* parserState, const String remainingBufferCo
 	LinkedList_dump(relevantList);
 
 	// Save the final URL
-	String parsedURL = malloc(sizeof(String));
+	String parsedURL = String_Allocate(relevantList->totalSpanSizeInBytes);
 	LinkedList_toString(relevantList, parsedURL);
 	((RequestDetails*) parserState->data)->url = parsedURL;
 	DEBUG("Stored parsed URL: %s\n", parsedURL);
@@ -137,7 +128,7 @@ int Bindings_OnHeaderFieldComplete(llhttp_t* parserState, const String remaining
 	LinkedList_dump(relevantList);
 
 	// Save the final URL
-	String headerFieldName = malloc(sizeof(String));
+	String headerFieldName = String_Allocate(numRelevantBytes);
 	LinkedList_toString(relevantList, headerFieldName);
 
 	RequestDetails* requestDetails = ((RequestDetails*) parserState->data);
@@ -161,7 +152,7 @@ int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remaining
 	// TODO Remove dump
 	LinkedList_dump(relevantList);
 
-	String headerValue = malloc(sizeof(String));
+	String headerValue = String_Allocate(numRelevantBytes);
 	LinkedList_toString(relevantList, headerValue);
 
 
@@ -183,7 +174,7 @@ int Bindings_OnHeaderValueComplete(llhttp_t* parserState, const String remaining
 void Bindings_InitializeUserData(llhttp_t* parserState) {
 	DEBUG("[Bindings_InitializeUserData]\n");
 
-	RequestDetails* requestDetails = malloc(sizeof(RequestDetails));
+	RequestDetails* requestDetails = RequestDetails_Allocate();
 	memset(requestDetails, 0, sizeof(RequestDetails));
 
 	requestDetails->numHeaderPairs = 0;
