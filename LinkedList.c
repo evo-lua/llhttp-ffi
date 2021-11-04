@@ -170,8 +170,9 @@ String LinkedList_toString(LinkedList* list, String buffer) {
 		String span = element->value;
 		DEBUG("Copying span: %s\n", span);
 		for(int i = 0; i< element->numCharacters; i++) {
-		//DEBUG("nextFreeindex: %d\ni: %d\nCopying character: %c\n", nextFreeIndex, i, span[i]);
+		DEBUG("nextFreeindex: %d\ni: %d\nCopying character: %c\n", nextFreeIndex, i, span[i]);
 			buffer[nextFreeIndex + i] = span[i];
+			DEBUG("Buffer contents at index %i: %c", nextFreeIndex + i, buffer[nextFreeIndex + i]);
 		}
 		DEBUG("Buffer contents so far: %s\n", buffer);
 		element = element->previous;

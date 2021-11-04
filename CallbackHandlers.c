@@ -73,8 +73,25 @@ int Bindings_OnHeadersComplete(llhttp_t* parserState, const String remainingBuff
 	LinkedList* headerPairs = requestDetails->headerKeyValueTokens;
 
 	DEBUG("Processing %d header pairs stored during the parsing process\n", requestDetails->numHeaderPairs);
-	LinkedList_dump(headerPairs);
+	// LinkedList_dump(headerPairs);
 
+	if(requestDetails->numHeaderPairs == 0) return 0; // Headers are completely optional
+DEBUG("Storing k, v pairs as String array");
+	String* pairs = malloc(requestDetails->numHeaderPairs * sizeof(String));
+	for(size_t index = requestDetails->numHeaderPairs; index > 0 ; index--) {
+		String span = String_Allocate(strlen(headerPairs->tail->value) + 1);
+		LinkedList_getTail(headerPairs, span);
+		LinkedList_removeTail(headerPairs);
+	// 	// TBD: numHeaderPairs-- ?
+	size_t destinationOffset = index - 1;
+		DEBUG("Processing string %d/%d: %s (stored at offset %d)", index, requestDetails->numHeaderPairs, span, destinationOffset);
+		pairs[destinationOffset] = span;
+	}
+	// pairs[0] = "First header key";
+	// pairs[1] = "First header value";
+	requestDetails->headerKeysAndValues = pairs;
+	printf("Finished processing header pairs");
+	// TBD: Free when?
 	return 0;
 }
 

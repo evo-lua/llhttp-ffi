@@ -290,6 +290,26 @@ function llhttp:execute(stringToParse)
 	self.method = tonumber(self.state.method)
 	self.parsedURL = ffi.string(self.state.data.url)
 	self.version = tonumber(self.state.http_major) + tonumber(self.state.http_minor) / 10
+
+	-- TBD: Make it optional? May use a lot of memory if large (or even just many small) messages are received and cached
+	self.lastProcessedToken = stringToParse
+	local expectedNumberOfHeaderPairs = tonumber(self.state.data.numHeaderPairs)
+	printf("Expecting %d header pairs", expectedNumberOfHeaderPairs)
+
+	self.headers = {}
+
+	if expectedNumberOfHeaderPairs > 0 then
+		printf("Processing %d header pairs", expectedNumberOfHeaderPairs)
+
+		for headerID = 1, expectedNumberOfHeaderPairs do
+			local storedValue = ffi.string(self.state.data.headerKeysAndValues[headerID - 1])
+			printf("Processing header %d: %s", headerID, storedValue)
+			table.insert(self.headers, storedValue) -- TBD Store as k, v or hash map? Multiples may occur... see nodeJS issues (referenced)
+		end
+	end
+end
+
+function llhttp:finish()
 end
 
 function llhttp:finish() end
