@@ -1,5 +1,5 @@
 -- Whatever name or description you set here will be displayed in the final report
-local testSuite = TestSuite:Construct("Low-level C API Bindings")
+local testSuite = TestSuite:Construct("Low-level C Bindings")
 
 local listOfScenarioFilesToLoad = {
     "./Bindings/export-llhttp-api.lua"
