@@ -37,7 +37,7 @@ function scenario:OnRun()
 function scenario:OnEvaluate()
 
 	for _, functionName in ipairs(exportedApiSurface) do
-		assertEquals(type(bindings[functionName]), "cdata", "Should export bound function " .. functionName)
+		assertEquals(type(bindings[functionName]), "cdata", "Should bind function " .. functionName)
 	end
 
 end
