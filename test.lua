@@ -5,7 +5,6 @@ _G.llhttp = llhttp
 local testSuites = {
 	"Tests/c-api-bindings.lua",
 	"Tests/incremental-http-parser.lua"
-	-- You can add as many entries as you like here
 }
 
 for _, filePath in pairs(testSuites) do
@@ -14,7 +13,6 @@ for _, filePath in pairs(testSuites) do
 	assert(testSuite:Run(), "Assertion failure in test suite " .. filePath)
 end
 
-import("Tests/test-api-surface.lua")
 import("Tests/API/test-create.lua")
 import("Tests/API/test-execute-basic.lua")
 import("Tests/API/test-execute-upgrade-multivalue.lua")
