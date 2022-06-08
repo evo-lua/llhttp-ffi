@@ -1,0 +1,14 @@
+# msvc output
+*.obj
+*.exp
+*.lib
+*.dll
+*.exe
+
+# Packaged release
+*.tar.gz
+
+# llhttp source (typescript; only needed to build the c headers)
+llhttp/
+# Auto-generated, no point in tracking this
+llhttp.h
