@@ -4,6 +4,7 @@ _G.llhttp = llhttp
 
 local testSuites = {
 	"Tests/c-api-bindings.lua",
+	"Tests/incremental-http-parser.lua"
 }
 
 for _, filePath in pairs(testSuites) do
