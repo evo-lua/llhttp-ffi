@@ -151,6 +151,7 @@ function IncrementalHttpParser:Construct()
 		end,
 		__tostring = function()
 			local tokens = {}
+			tokens[#tokens+1] = "Message Type:\t" .. tonumber(instance.state.type)
 			tokens[#tokens+1] = "Method:\t\t" .. ffi_string(bindings.llhttp_method_name(instance.state.method))
 			tokens[#tokens+1] = "URL:\t\t" .. instance.additionalState.requestURL
 			tokens[#tokens+1] = "Version:\tHTTP/" .. tonumber(instance.state.http_major) .. "." .. tonumber(instance.state.http_minor)
