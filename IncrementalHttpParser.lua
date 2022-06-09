@@ -116,6 +116,11 @@ function IncrementalHttpParser:Construct()
 	return instance
 end
 
+function IncrementalHttpParser:Reset()
+	DEBUG("Resetting HTTP parser state")
+	bindings.llhttp_reset(self.state)
+end
+
 function IncrementalHttpParser:Execute(chunk)
 	DEBUG("Executing parser on chunk", chunk)
 
