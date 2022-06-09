@@ -9,36 +9,7 @@ local format = format
 local setmetatable = setmetatable
 local tonumber = tonumber
 
-local IncrementalHttpParser = {
-	-- todo test cases that trigger these errors
-	errorMessages = {
-		HPE_OK = "OK",
-		HPE_INTERNAL = 1,
-		HPE_STRICT = 2,
-		HPE_LF_EXPECTED = 3,
-		HPE_UNEXPECTED_CONTENT_LENGTH = 4,
-		HPE_CLOSED_CONNECTION = 5,
-		HPE_INVALID_METHOD = 6,
-		HPE_INVALID_URL = 7,
-		HPE_INVALID_CONSTANT = 8,
-		HPE_INVALID_VERSION = 9,
-		HPE_INVALID_HEADER_TOKEN = 10,
-		HPE_INVALID_CONTENT_LENGTH = 11,
-		HPE_INVALID_CHUNK_SIZE = 12,
-		HPE_INVALID_STATUS = "Invalid status code",
-		HPE_INVALID_EOF_STATE = 14,
-		HPE_INVALID_TRANSFER_ENCODING = 15,
-		HPE_CB_MESSAGE_BEGIN = 16,
-		HPE_CB_HEADERS_COMPLETE = 17,
-		HPE_CB_MESSAGE_COMPLETE = 18,
-		HPE_CB_CHUNK_HEADER = 19,
-		HPE_CB_CHUNK_COMPLETE = 20,
-		HPE_PAUSED = 21,
-		HPE_PAUSED_UPGRADE = 22,
-		HPE_PAUSED_H2_UPGRADE = 23,
-		HPE_USER = 24
-	}
-}
+local IncrementalHttpParser = {}
 
 function IncrementalHttpParser:Construct()
 
@@ -161,17 +132,7 @@ end
 
 function IncrementalHttpParser:OnError(errorCode)
 	DEBUG("OnError", errorCode)
-
-	local errorMessage = format("HTTP Parser Error: %s [%s]", self:GetFriendlyErrorMessage(errorCode), errorCode)
-	DEBUG(errorMessage)
-
 	-- Would probably want to send 400 Bad Request response here?
-end
-
-function IncrementalHttpParser:GetFriendlyErrorMessage(llhttpErrorCode)
-	local humanReadableErrorMessage = self.errorMessages[llhttpErrorCode]
-
-	return humanReadableErrorMessage or "???"
 end
 
 function IncrementalHttpParser:OnMessageBegin()
