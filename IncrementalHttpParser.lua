@@ -28,6 +28,11 @@ local IncrementalHttpParser = {
 -- IsHttpRequest(state)
 -- IsHttpResponse(state)
 
+-- SetRequestMode
+-- SetResponseMode
+-- SetAutoDetectMode
+-- ToRequest/ToResponse/ToHttpMessage
+
 function IncrementalHttpParser:Construct()
 
 	local parserState = ffi_new("llhttp_t")
@@ -175,6 +180,7 @@ end
 
 function IncrementalHttpParser:Reset()
 	DEBUG("Resetting HTTP parser state")
+	bindings.llhttp_finish(self.state) -- TBD what's the point of this?
 	bindings.llhttp_reset(self.state)
 
 	-- This state is only valid for the current request
